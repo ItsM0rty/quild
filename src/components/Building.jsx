@@ -12,8 +12,19 @@ const Building = ({
 
   const clonedScene = useMemo(() => {
     if (!scene) return null;
-    return scene.clone();
-  }, [scene]);
+    const aClonedScene = scene.clone();
+
+    if (aModelPath === "/two_story_house.glb") {
+      const aBox = new THREE.Box3().setFromObject(aClonedScene);
+      const aCenter = aBox.getCenter(new THREE.Vector3());
+      const aSize = aBox.getSize(new THREE.Vector3());
+      aClonedScene.position.x -= aCenter.x;
+      aClonedScene.position.y -= aBox.min.y + aSize.y * 0.1;
+      aClonedScene.position.z -= aCenter.z;
+    }
+
+    return aClonedScene;
+  }, [scene, aModelPath]);
 
   const materials = useMemo(() => {
     return {

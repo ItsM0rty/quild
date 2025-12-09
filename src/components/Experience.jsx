@@ -5,10 +5,22 @@ import { useQuildConfiguration } from "../contexts/QuildConfiguration";
 import Building from "./Building";
 import * as THREE from "three";
 
-const CameraController = () => {
+const CameraController = ({ aSelectedBuilding }) => {
   const { camera } = useThree();
-  const aDistanceRef = useRef(20);
-  const aTargetDistance = useRef(20);
+  const aInitialDistance = aSelectedBuilding?.modelPath === "/two_story_house.glb" ? 28 : 20;
+  const aDistanceRef = useRef(aInitialDistance);
+  const aTargetDistance = useRef(aInitialDistance);
+
+  useEffect(() => {
+    const aNewInitialDistance = aSelectedBuilding?.modelPath === "/two_story_house.glb" ? 28 : 20;
+    aTargetDistance.current = aNewInitialDistance;
+    
+    const aCurrentDistance = camera.position.length();
+    const aDirection = new THREE.Vector3()
+      .copy(camera.position)
+      .normalize();
+    camera.position.copy(aDirection.multiplyScalar(aNewInitialDistance));
+  }, [aSelectedBuilding?.modelPath, camera]);
 
   useEffect(() => {
     const handleWheel = (anEvent) => {
@@ -68,7 +80,7 @@ const Experience = () => {
 
   return (
     <>
-      <CameraController />
+      <CameraController aSelectedBuilding={aSelectedBuilding} />
       <PresentationControls
         speed={1.35}
         global
