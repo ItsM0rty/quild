@@ -4,15 +4,25 @@ const buildingOptions = [
   {
     id: "residential",
     name: "Residential Home",
-    description: "2-story family layout with a pitched roof",
+    description: "Single-story family home",
     basePrice: 4500,
+    modelPath: "/house.glb",
     footprint: { width: 7, height: 3, depth: 9, roofHeight: 1.4 },
+  },
+  {
+    id: "residentialTwoStory",
+    name: "Two-Story House",
+    description: "2-story family layout with a pitched roof",
+    basePrice: 5200,
+    modelPath: "/two_story_house.glb",
+    footprint: { width: 7, height: 5, depth: 9, roofHeight: 1.4 },
   },
   {
     id: "commercial",
     name: "Commercial Office",
     description: "Glass-heavy facade with a flat roofline",
     basePrice: 6200,
+    modelPath: null,
     footprint: { width: 8.5, height: 3.4, depth: 10, roofHeight: 0.8 },
   },
   {
@@ -20,6 +30,7 @@ const buildingOptions = [
     name: "Industrial Warehouse",
     description: "Wide-span shell with metal roofing",
     basePrice: 5300,
+    modelPath: null,
     footprint: { width: 10.5, height: 3.2, depth: 11.5, roofHeight: 1.1 },
   },
 ];

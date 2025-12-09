@@ -1,6 +1,46 @@
 import { PresentationControls, Stage } from "@react-three/drei";
-import { useMemo } from "react";
+import { useMemo, useRef, useEffect } from "react";
+import { useThree, useFrame } from "@react-three/fiber";
 import { useQuildConfiguration } from "../contexts/QuildConfiguration";
+import Building from "./Building";
+import * as THREE from "three";
+
+const CameraController = () => {
+  const { camera } = useThree();
+  const aDistanceRef = useRef(20);
+  const aTargetDistance = useRef(20);
+
+  useEffect(() => {
+    const handleWheel = (anEvent) => {
+      anEvent.preventDefault();
+      const aDelta = anEvent.deltaY * 0.009;
+      aTargetDistance.current = Math.max(
+        3,
+        Math.min(40, aTargetDistance.current + aDelta)
+      );
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => window.removeEventListener("wheel", handleWheel);
+  }, []);
+
+  useFrame(() => {
+    const aCurrentDistance = camera.position.length();
+    const aDifference = aTargetDistance.current - aCurrentDistance;
+
+    if (Math.abs(aDifference) > 0.01) {
+      const aDirection = new THREE.Vector3()
+        .copy(camera.position)
+        .normalize();
+      const aNewDistance = aCurrentDistance + aDifference * 0.1;
+      camera.position.copy(
+        aDirection.multiplyScalar(Math.max(3, Math.min(40, aNewDistance)))
+      );
+    }
+  });
+
+  return null;
+};
 
 const Experience = () => {
   const {
@@ -24,41 +64,59 @@ const Experience = () => {
     };
   }, [aSelectedBuilding]);
 
+  const hasModel = aSelectedBuilding.modelPath !== null;
+
   return (
-    <PresentationControls
-      speed={1.35}
-      global
-      polar={[-0.1, Math.PI / 4]}
-      rotation={[Math.PI / 8, Math.PI / 6, 0]}
-    >
+    <>
+      <CameraController />
+      <PresentationControls
+        speed={1.35}
+        global
+        polar={[0, Math.PI / 3]}
+        rotation={[0, Math.PI / 4, 0]}
+        config={{ mass: 2, tension: 50 }}
+      >
       <Stage
         environment="city"
         intensity={0.7}
         castShadow={false}
-        adjustCamera
+        adjustCamera={false}
+        shadows={false}
       >
-        <group>
-          <mesh position={buildingMeshes.basePosition} castShadow receiveShadow>
-            <boxGeometry args={buildingMeshes.baseDimensions} />
-            <meshStandardMaterial color={aSelectedWallsMaterial.color} />
-          </mesh>
+        {hasModel ? (
+          <Building
+            aModelPath={aSelectedBuilding.modelPath}
+            aWallsMaterial={aSelectedWallsMaterial}
+            aRoofMaterial={aSelectedRoofMaterial}
+            aFloorMaterial={aSelectedFloorMaterial}
+          />
+        ) : (
+          <group>
+            <mesh position={buildingMeshes.basePosition} castShadow receiveShadow>
+              <boxGeometry args={buildingMeshes.baseDimensions} />
+              <meshStandardMaterial color={aSelectedWallsMaterial.color} />
+            </mesh>
 
-          <mesh position={buildingMeshes.roofPosition} castShadow receiveShadow>
-            <boxGeometry args={buildingMeshes.roofDimensions} />
-            <meshStandardMaterial color={aSelectedRoofMaterial.color} />
-          </mesh>
-        </group>
+            <mesh position={buildingMeshes.roofPosition} castShadow receiveShadow>
+              <boxGeometry args={buildingMeshes.roofDimensions} />
+              <meshStandardMaterial color={aSelectedRoofMaterial.color} />
+            </mesh>
+          </group>
+        )}
       </Stage>
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position-y={0}>
-        <planeGeometry args={[22, 22]} />
-        <meshStandardMaterial
-          color={aSelectedFloorMaterial.color}
-          roughness={0.85}
-          metalness={0.05}
-        />
-      </mesh>
-    </PresentationControls>
+      {!hasModel && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position-y={-0.01}>
+          <planeGeometry args={[22, 22]} />
+          <meshStandardMaterial
+            color={aSelectedFloorMaterial.color}
+            roughness={0.85}
+            metalness={0.05}
+          />
+        </mesh>
+      )}
+      </PresentationControls>
+    </>
   );
 };
 
