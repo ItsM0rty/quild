@@ -102,6 +102,54 @@ const floorMaterials = [
     color: "#c2b59b",
     price: 2700,
   },
+  {
+    id: "ceramicTile",
+    name: "Ceramic Tile",
+    color: "#d4c5b0",
+    price: 2600,
+  },
+];
+
+const windowMaterials = [
+  {
+    id: "clear",
+    name: "Clear Glass",
+    color: "#e8f4f8",
+    price: 1800,
+  },
+  {
+    id: "tinted",
+    name: "Tinted Glass",
+    color: "#4a5568",
+    price: 2200,
+  },
+  {
+    id: "frosted",
+    name: "Frosted Glass",
+    color: "#d1d5db",
+    price: 2000,
+  },
+];
+
+const doorMaterials = [
+  {
+    id: "wood",
+    name: "Wood Door",
+    color: "#8b6f47",
+    price: 1200,
+  },
+  {
+    id: "metal",
+    name: "Metal Door",
+    color: "#4a5568",
+    price: 1500,
+  },
+  {
+    id: "glass",
+    name: "Glass Door",
+    color: "#cbd5e0",
+    price: 1800,
+  },
 ];
 
 const QuildConfigurationContext = createContext({});

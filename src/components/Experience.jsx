@@ -97,6 +97,7 @@ const Experience = () => {
       >
         {hasModel ? (
           <Building
+            key={aSelectedBuilding.modelPath}
             aModelPath={aSelectedBuilding.modelPath}
             aWallsMaterial={aSelectedWallsMaterial}
             aRoofMaterial={aSelectedRoofMaterial}
