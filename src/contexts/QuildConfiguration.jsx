@@ -80,6 +80,12 @@ const roofMaterials = [
     name: "Clay Tiles",
     color: "#9c3e2f",
     price: 2800,
+    texture: {
+      albedoMap: "/textures/roof/clay_roof_tiles_diff_4k.jpg",
+      normalMap: "/textures/roof/clay_roof_tiles_nor_gl_4k.jpg",
+      roughnessMap: "/textures/roof/clay_roof_tiles_rough_4k.jpg",
+      repeat: [0.7, 0.6],
+    },
   },
   {
     id: "shingle",
@@ -92,9 +98,15 @@ const roofMaterials = [
 const floorMaterials = [
   {
     id: "hardwood",
-    name: "Hardwood Flooring",
+    name: "Plank Flooring",
     color: "#b28964",
     price: 3000,
+    texture: {
+      albedoMap: "/textures/floor/plank_flooring_04_diff_4k.jpg",
+      normalMap: "/textures/floor/plank_flooring_04_nor_gl_4k.jpg",
+      roughnessMap: "/textures/floor/plank_flooring_04_rough_4k.jpg",
+      repeat: [1, 1],
+    },
   },
   {
     id: "polishedConcrete",
