@@ -82,13 +82,128 @@ const Building = ({
         const aMaxY = aBoundingBox.max.y;
         const aMinY = aBoundingBox.min.y;
 
+        const aWallMeshes = [];
         aAllMeshes.forEach((aMesh) => {
           const aMeshName = aMesh.name.toLowerCase();
           const aGeometryName = aMesh.geometry?.name?.toLowerCase() || "";
           const aMeshBoundingBox = new THREE.Box3().setFromObject(aMesh);
           const aMeshCenter = aMeshBoundingBox.getCenter(new THREE.Vector3());
           const aMeshSize = aMeshBoundingBox.getSize(new THREE.Vector3());
-          
+
+          const aIsRoofCandidate =
+            aMeshName.includes("roof") ||
+            aMeshName.includes("rooftop") ||
+            aMeshName.includes("ceiling") ||
+            aGeometryName.includes("roof") ||
+            (aMeshCenter.y > aCenter.y + aSize.y * 0.25 && aMeshSize.y < aSize.y * 0.25);
+
+          const aIsGroundCandidate =
+            aMeshName.includes("ground") ||
+            aMeshName.includes("foundation") ||
+            aMeshName.includes("base") ||
+            aMeshName.includes("terrain") ||
+            aMeshName.includes("earth") ||
+            aGeometryName.includes("ground") ||
+            aGeometryName.includes("foundation") ||
+            (aMeshCenter.y < aMinY + aSize.y * 0.1 && aMeshSize.y < aSize.y * 0.15);
+
+          const aIsWindowCandidate =
+            aMeshName.includes("window") ||
+            aMeshName.includes("glass") ||
+            aMeshName.includes("pane") ||
+            aMeshName.includes("glazing") ||
+            (aMeshName.includes("frame") && aMeshName.includes("window")) ||
+            aGeometryName.includes("window") ||
+            aGeometryName.includes("glass");
+
+          const aIsDoorCandidate =
+            aMeshName.includes("door") ||
+            aMeshName.includes("entrance") ||
+            aMeshName.includes("entry") ||
+            aMeshName.includes("gate") ||
+            aGeometryName.includes("door") ||
+            (aMeshSize.x < aSize.x * 0.2 &&
+              aMeshSize.z < aSize.z * 0.1 &&
+              aMeshCenter.y > aMinY + aSize.y * 0.2 &&
+              aMeshCenter.y < aMinY + aSize.y * 0.5);
+
+          const aIsPillarCandidate =
+            aMeshName.includes("pillar") ||
+            aMeshName.includes("column") ||
+            aMeshName.includes("post") ||
+            aMeshName.includes("support") ||
+            aGeometryName.includes("pillar") ||
+            aGeometryName.includes("column") ||
+            (aMeshSize.x < aSize.x * 0.1 &&
+              aMeshSize.z < aSize.z * 0.1 &&
+              aMeshSize.y > aSize.y * 0.3 &&
+              aMeshCenter.y > aMinY + aSize.y * 0.2);
+
+          const aIsWallCandidate =
+            !aIsRoofCandidate &&
+            !aIsGroundCandidate &&
+            !aIsWindowCandidate &&
+            !aIsDoorCandidate &&
+            !aIsPillarCandidate &&
+            (aMeshName.includes("wall") ||
+              aMeshName.includes("exterior") ||
+              aMeshName.includes("facade") ||
+              aMeshName.includes("siding") ||
+              (aMeshCenter.y > aMinY + aSize.y * 0.15 &&
+                aMeshCenter.y < aMaxY - aSize.y * 0.25 &&
+                Math.abs(aMeshSize.y) > aSize.y * 0.15));
+
+          if (aIsWallCandidate) {
+            aWallMeshes.push(aMesh);
+          }
+        });
+
+        let aBuildingMinX = Infinity;
+        let aBuildingMaxX = -Infinity;
+        let aBuildingMinZ = Infinity;
+        let aBuildingMaxZ = -Infinity;
+
+        aWallMeshes.forEach((aWallMesh) => {
+          const aWallBox = new THREE.Box3().setFromObject(aWallMesh);
+          aBuildingMinX = Math.min(aBuildingMinX, aWallBox.min.x);
+          aBuildingMaxX = Math.max(aBuildingMaxX, aWallBox.max.x);
+          aBuildingMinZ = Math.min(aBuildingMinZ, aWallBox.min.z);
+          aBuildingMaxZ = Math.max(aBuildingMaxZ, aWallBox.max.z);
+        });
+
+        if (aWallMeshes.length === 0) {
+          aBuildingMinX = aCenter.x - aSize.x * 0.4;
+          aBuildingMaxX = aCenter.x + aSize.x * 0.4;
+          aBuildingMinZ = aCenter.z - aSize.z * 0.4;
+          aBuildingMaxZ = aCenter.z + aSize.z * 0.4;
+        }
+
+        const aFootprintMarginX = Math.max((aBuildingMaxX - aBuildingMinX) * 0.05, aSize.x * 0.02);
+        const aFootprintMarginZ = Math.max((aBuildingMaxZ - aBuildingMinZ) * 0.05, aSize.z * 0.02);
+        aBuildingMinX -= aFootprintMarginX;
+        aBuildingMaxX += aFootprintMarginX;
+        aBuildingMinZ -= aFootprintMarginZ;
+        aBuildingMaxZ += aFootprintMarginZ;
+
+        aAllMeshes.forEach((aMesh) => {
+          const aMeshName = aMesh.name.toLowerCase();
+          const aGeometryName = aMesh.geometry?.name?.toLowerCase() || "";
+          const aMeshBoundingBox = new THREE.Box3().setFromObject(aMesh);
+          const aMeshCenter = aMeshBoundingBox.getCenter(new THREE.Vector3());
+          const aMeshSize = aMeshBoundingBox.getSize(new THREE.Vector3());
+
+          const aIsWithinFootprint =
+            aMeshCenter.x >= aBuildingMinX &&
+            aMeshCenter.x <= aBuildingMaxX &&
+            aMeshCenter.z >= aBuildingMinZ &&
+            aMeshCenter.z <= aBuildingMaxZ;
+
+          const aMeshExtendsOutside =
+            aMeshBoundingBox.min.x < aBuildingMinX - aSize.x * 0.1 ||
+            aMeshBoundingBox.max.x > aBuildingMaxX + aSize.x * 0.1 ||
+            aMeshBoundingBox.min.z < aBuildingMinZ - aSize.z * 0.1 ||
+            aMeshBoundingBox.max.z > aBuildingMaxZ + aSize.z * 0.1;
+
           const aOriginalMaterial = aMesh.material;
           const aIsTransparent =
             aOriginalMaterial?.transparent === true ||
@@ -110,10 +225,27 @@ const Building = ({
             aMeshName.includes("earth") ||
             aGeometryName.includes("ground") ||
             aGeometryName.includes("foundation") ||
-            (aMeshCenter.y < aMinY + aSize.y * 0.1 && aMeshSize.y < aSize.y * 0.15);
+            (aMeshCenter.y < aMinY + aSize.y * 0.1 && aMeshSize.y < aSize.y * 0.15) ||
+            (!aIsWithinFootprint &&
+              aMeshCenter.y < aMinY + aSize.y * 0.2 &&
+              aMeshSize.y < aSize.y * 0.2);
+
+          const aIsDoor =
+            aMeshName.includes("door") ||
+            aMeshName.includes("entrance") ||
+            aMeshName.includes("entry") ||
+            aMeshName.includes("gate") ||
+            aGeometryName.includes("door") ||
+            (aMeshSize.x < aSize.x * 0.2 &&
+              aMeshSize.z < aSize.z * 0.1 &&
+              aMeshCenter.y > aMinY + aSize.y * 0.2 &&
+              aMeshCenter.y < aMinY + aSize.y * 0.5);
 
           const aIsExteriorFloor =
             !aIsGround &&
+            !aIsDoor &&
+            aIsWithinFootprint &&
+            !aMeshExtendsOutside &&
             (aMeshName.includes("floor") ||
               aMeshName.includes("stairs") ||
               aMeshName.includes("stair") ||
@@ -127,15 +259,14 @@ const Building = ({
               aGeometryName.includes("stairs") ||
               (aMeshCenter.y > aMinY + aSize.y * 0.1 &&
                 aMeshCenter.y < aMinY + aSize.y * 0.3 &&
-                aMeshSize.y < aSize.y * 0.2 &&
-                !aIsGround));
+                aMeshSize.y < aSize.y * 0.2));
 
           const aIsWindow =
             aMeshName.includes("window") ||
             aMeshName.includes("glass") ||
             aMeshName.includes("pane") ||
             aMeshName.includes("glazing") ||
-            aMeshName.includes("frame") && aMeshName.includes("window") ||
+            (aMeshName.includes("frame") && aMeshName.includes("window")) ||
             aGeometryName.includes("window") ||
             aGeometryName.includes("glass") ||
             aIsTransparent ||
@@ -143,17 +274,6 @@ const Building = ({
               aMeshSize.z < aSize.z * 0.15 &&
               aMeshCenter.y > aMinY + aSize.y * 0.3 &&
               aMeshCenter.y < aMaxY - aSize.y * 0.2);
-
-          const aIsDoor =
-            aMeshName.includes("door") ||
-            aMeshName.includes("entrance") ||
-            aMeshName.includes("entry") ||
-            aMeshName.includes("gate") ||
-            aGeometryName.includes("door") ||
-            (aMeshSize.x < aSize.x * 0.2 &&
-              aMeshSize.z < aSize.z * 0.1 &&
-              aMeshCenter.y > aMinY + aSize.y * 0.2 &&
-              aMeshCenter.y < aMinY + aSize.y * 0.5);
 
           const aIsPillar =
             aMeshName.includes("pillar") ||
