@@ -41,6 +41,12 @@ const wallMaterials = [
     name: "Brick",
     color: "#b45a3c",
     price: 5000,
+    texture: {
+      albedoMap: "/textures/walls/red_brick_diff_4k.jpg",
+      normalMap: "/textures/walls/red_brick_nor_gl_4k.jpg",
+      roughnessMap: "/textures/walls/red_brick_rough_4k.jpg",
+      repeat: [1, 0.7],
+    },
   },
   {
     id: "concrete",

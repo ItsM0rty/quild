@@ -1,6 +1,5 @@
-import { useGLTF } from "@react-three/drei";
+import { useGLTF, useTexture } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 const Building = ({
@@ -13,6 +12,9 @@ const Building = ({
   const aMaterialsRef = useRef(null);
   const aInitializedRef = useRef(false);
   const aLastModelPathRef = useRef(null);
+  const aLastWallsMaterialIdRef = useRef(null);
+  const aLastRoofMaterialIdRef = useRef(null);
+  const aLastFloorMaterialIdRef = useRef(null);
 
   const clonedScene = useMemo(() => {
     if (!scene) return null;
@@ -30,6 +32,86 @@ const Building = ({
     return aClonedScene;
   }, [scene, aModelPath]);
 
+  const aWallsTextureParams = useMemo(() => {
+    const aTextureConfig = aWallsMaterial.texture;
+    const aParams = {};
+    if (aTextureConfig?.albedoMap) {
+      aParams.map = aTextureConfig.albedoMap;
+    }
+    if (aTextureConfig?.normalMap) {
+      aParams.normalMap = aTextureConfig.normalMap;
+    }
+    if (aTextureConfig?.roughnessMap) {
+      aParams.roughnessMap = aTextureConfig.roughnessMap;
+    }
+    return aParams;
+  }, [aWallsMaterial]);
+
+  const aRoofTextureParams = useMemo(() => {
+    const aTextureConfig = aRoofMaterial.texture;
+    const aParams = {};
+    if (aTextureConfig?.albedoMap) {
+      aParams.map = aTextureConfig.albedoMap;
+    }
+    if (aTextureConfig?.normalMap) {
+      aParams.normalMap = aTextureConfig.normalMap;
+    }
+    if (aTextureConfig?.roughnessMap) {
+      aParams.roughnessMap = aTextureConfig.roughnessMap;
+    }
+    return aParams;
+  }, [aRoofMaterial]);
+
+  const aFloorTextureParams = useMemo(() => {
+    const aTextureConfig = aFloorMaterial.texture;
+    const aParams = {};
+    if (aTextureConfig?.albedoMap) {
+      aParams.map = aTextureConfig.albedoMap;
+    }
+    if (aTextureConfig?.normalMap) {
+      aParams.normalMap = aTextureConfig.normalMap;
+    }
+    if (aTextureConfig?.roughnessMap) {
+      aParams.roughnessMap = aTextureConfig.roughnessMap;
+    }
+    return aParams;
+  }, [aFloorMaterial]);
+
+  const aWallTextures = useTexture(aWallsTextureParams);
+  const aRoofTextures = useTexture(aRoofTextureParams);
+  const aFloorTextures = useTexture(aFloorTextureParams);
+
+  useEffect(() => {
+    const aApplyTextureSettings = (aTextures, aTextureConfig) => {
+      if (!aTextureConfig) {
+        return;
+      }
+      const aRepeat = Array.isArray(aTextureConfig.repeat)
+        ? aTextureConfig.repeat
+        : [1, 1];
+      Object.values(aTextures).forEach((aTexture) => {
+        if (!aTexture) {
+          return;
+        }
+        aTexture.wrapS = THREE.RepeatWrapping;
+        aTexture.wrapT = THREE.RepeatWrapping;
+        aTexture.repeat.set(aRepeat[0], aRepeat[1]);
+        aTexture.needsUpdate = true;
+      });
+    };
+
+    aApplyTextureSettings(aWallTextures, aWallsMaterial.texture);
+    aApplyTextureSettings(aRoofTextures, aRoofMaterial.texture);
+    aApplyTextureSettings(aFloorTextures, aFloorMaterial.texture);
+  }, [
+    aWallTextures,
+    aRoofTextures,
+    aFloorTextures,
+    aWallsMaterial,
+    aRoofMaterial,
+    aFloorMaterial,
+  ]);
+
   useEffect(() => {
     if (!clonedScene) return;
 
@@ -43,16 +125,25 @@ const Building = ({
         aMaterialsRef.current = {
           walls: new THREE.MeshStandardMaterial({
             color: aWallsMaterial.color,
+            map: aWallTextures.map || null,
+            normalMap: aWallTextures.normalMap || null,
+            roughnessMap: aWallTextures.roughnessMap || null,
             roughness: 0.7,
             metalness: 0.1,
           }),
           roof: new THREE.MeshStandardMaterial({
             color: aRoofMaterial.color,
+            map: aRoofTextures.map || null,
+            normalMap: aRoofTextures.normalMap || null,
+            roughnessMap: aRoofTextures.roughnessMap || null,
             roughness: 0.8,
             metalness: 0.2,
           }),
           floor: new THREE.MeshStandardMaterial({
             color: aFloorMaterial.color,
+            map: aFloorTextures.map || null,
+            normalMap: aFloorTextures.normalMap || null,
+            roughnessMap: aFloorTextures.roughnessMap || null,
             roughness: 0.85,
             metalness: 0.05,
           }),
@@ -576,46 +667,52 @@ const Building = ({
       }
 
       aInitializedRef.current = true;
+      aLastWallsMaterialIdRef.current = aWallsMaterial.id;
+      aLastRoofMaterialIdRef.current = aRoofMaterial.id;
+      aLastFloorMaterialIdRef.current = aFloorMaterial.id;
     }
-  }, [clonedScene, aModelPath]);
+  }, [
+    clonedScene,
+    aModelPath,
+    aWallsMaterial,
+    aRoofMaterial,
+    aFloorMaterial,
+    aWallTextures,
+    aRoofTextures,
+    aFloorTextures,
+  ]);
 
-  useFrame(() => {
-    if (!aMaterialsRef.current || aModelPath !== "/house.glb") return;
-
-    const aWallsColor = new THREE.Color(aWallsMaterial.color);
-    const aRoofColor = new THREE.Color(aRoofMaterial.color);
-    const aFloorColor = new THREE.Color(aFloorMaterial.color);
-
-    if (!aMaterialsRef.current.walls.color.equals(aWallsColor)) {
-      aMaterialsRef.current.walls.color.copy(aWallsColor);
-      aMaterialsRef.current.walls.needsUpdate = true;
+  useEffect(() => {
+    if (!aMaterialsRef.current || aModelPath !== "/house.glb") {
+      return;
     }
 
-    if (!aMaterialsRef.current.roof.color.equals(aRoofColor)) {
-      aMaterialsRef.current.roof.color.copy(aRoofColor);
-      aMaterialsRef.current.roof.needsUpdate = true;
-      if (aMaterialsRef.current.roofMeshes?.length > 0) {
-        console.log("Roof material updated:", {
-          color: aRoofColor.getHexString(),
-          meshCount: aMaterialsRef.current.roofMeshes.length,
-        });
+    const aUpdateMaterial = (aMaterial, aMaterialConfig, aTextures) => {
+      if (!aMaterial || !aMaterialConfig) {
+        return;
       }
-    }
-
-    if (!aMaterialsRef.current.floor.color.equals(aFloorColor)) {
-      aMaterialsRef.current.floor.color.copy(aFloorColor);
-      aMaterialsRef.current.floor.needsUpdate = true;
-      if (aMaterialsRef.current.floorMeshes?.length > 0) {
-        console.log("Exterior floor material updated:", {
-          color: aFloorColor.getHexString(),
-          meshCount: aMaterialsRef.current.floorMeshes.length,
-          meshNames: aMaterialsRef.current.floorMeshes.map((m) => m.name),
-        });
-      } else {
-        console.warn("No exterior floor meshes found to update!");
+      const aColor = new THREE.Color(aMaterialConfig.color);
+      if (!aMaterial.color.equals(aColor)) {
+        aMaterial.color.copy(aColor);
       }
-    }
-  });
+      aMaterial.map = aTextures.map || null;
+      aMaterial.normalMap = aTextures.normalMap || null;
+      aMaterial.roughnessMap = aTextures.roughnessMap || null;
+      aMaterial.needsUpdate = true;
+    };
+
+    aUpdateMaterial(aMaterialsRef.current.walls, aWallsMaterial, aWallTextures);
+    aUpdateMaterial(aMaterialsRef.current.roof, aRoofMaterial, aRoofTextures);
+    aUpdateMaterial(aMaterialsRef.current.floor, aFloorMaterial, aFloorTextures);
+  }, [
+    aWallsMaterial,
+    aRoofMaterial,
+    aFloorMaterial,
+    aWallTextures,
+    aRoofTextures,
+    aFloorTextures,
+    aModelPath,
+  ]);
 
   if (!clonedScene) return null;
 
