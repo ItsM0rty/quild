@@ -38,7 +38,7 @@ const buildingOptions = [
 const wallMaterials = [
   {
     id: "brick",
-    name: "Brick",
+    name: "Red Brick",
     color: "#b45a3c",
     price: 5000,
     texture: {
@@ -50,48 +50,66 @@ const wallMaterials = [
   },
   {
     id: "concrete",
-    name: "Concrete",
+    name: "Concrete Wall",
     color: "#8a8f9a",
     price: 4200,
+    texture: {
+      albedoMap: "/textures/walls/concrete_wall_008_diff_4k.jpg",
+      normalMap: "/textures/walls/concrete_wall_008_nor_gl_4k.jpg",
+      roughnessMap: "/textures/walls/concrete_wall_008_rough_4k.jpg",
+      repeat: [0.8, 0.6],
+    },
   },
   {
     id: "metalPanel",
-    name: "Metal Panels",
+    name: "Metal Wall",
     color: "#4f5d73",
     price: 4600,
+    texture: {
+      albedoMap: "/textures/walls/metal_wall_diff_4k.jpg",
+      normalMap: "/textures/walls/metal_wall_nor_gl_4k.jpg",
+      roughnessMap: "/textures/walls/metal_wall_rough_4k.jpg",
+      repeat: [2, 2],
+    },
   },
   {
     id: "woodSiding",
-    name: "Wood Siding",
+    name: "Wood Plank Wall",
     color: "#a36b3f",
     price: 4800,
+    texture: {
+      albedoMap: "/textures/walls/wood_plank_wall_diff_4k.jpg",
+      normalMap: "/textures/walls/wood_plank_wall_nor_gl_4k.jpg",
+      roughnessMap: "/textures/walls/wood_plank_wall_rough_4k.jpg",
+      repeat: [2, 1],
+    },
   },
 ];
 
 const roofMaterials = [
   {
-    id: "metal",
-    name: "Metal Roofing",
-    color: "#3c4859",
-    price: 2500,
-  },
-  {
     id: "tile",
-    name: "Clay Tiles",
+    name: "Clay Roof Tiles",
     color: "#9c3e2f",
     price: 2800,
     texture: {
       albedoMap: "/textures/roof/clay_roof_tiles_diff_4k.jpg",
       normalMap: "/textures/roof/clay_roof_tiles_nor_gl_4k.jpg",
       roughnessMap: "/textures/roof/clay_roof_tiles_rough_4k.jpg",
-      repeat: [0.7, 0.6],
+      repeat: [0.5, 0.4],
     },
   },
   {
-    id: "shingle",
-    name: "Architectural Shingles",
-    color: "#4a4a4a",
-    price: 2300,
+    id: "metal",
+    name: "Metal Sheet",
+    color: "#3c4859",
+    price: 2500,
+    texture: {
+      albedoMap: "/textures/roof/box_profile_metal_sheet_diff_4k.jpg",
+      normalMap: "/textures/roof/box_profile_metal_sheet_nor_gl_4k.jpg",
+      roughnessMap: "/textures/roof/box_profile_metal_sheet_rough_4k.jpg",
+      repeat: [0.8, 0.7],
+    },
   },
 ];
 
@@ -109,22 +127,40 @@ const floorMaterials = [
     },
   },
   {
-    id: "polishedConcrete",
-    name: "Polished Concrete",
-    color: "#9f9f9f",
-    price: 2400,
+    id: "brickVilla",
+    name: "Brick Villa Floor",
+    color: "#b45a3c",
+    price: 3000,
+    texture: {
+      albedoMap: "/textures/floor/brick_villa_floor_diff_4k.jpg",
+      normalMap: "/textures/floor/brick_villa_floor_nor_gl_4k.jpg",
+      roughnessMap: "/textures/floor/brick_villa_floor_rough_4k.jpg",
+      repeat: [0.8, 0.6],
+    },
   },
   {
-    id: "stoneTile",
-    name: "Stone Tile",
-    color: "#c2b59b",
+    id: "graniteTile",
+    name: "Granite Tile",
+    color: "#8a8a8a",
     price: 2700,
+    texture: {
+      albedoMap: "/textures/floor/granite_tile_04_diff_4k.jpg",
+      normalMap: "/textures/floor/granite_tile_04_nor_gl_4k.jpg",
+      roughnessMap: "/textures/floor/granite_tile_04_rough_4k.jpg",
+      repeat: [0.8, 0.6],
+    },
   },
   {
-    id: "ceramicTile",
-    name: "Ceramic Tile",
-    color: "#d4c5b0",
+    id: "stoneEmbedded",
+    name: "Stone Embedded Tiles",
+    color: "#9f9f9f",
     price: 2600,
+    texture: {
+      albedoMap: "/textures/floor/stone_embedded_tiles_diff_4k.jpg",
+      normalMap: "/textures/floor/stone_embedded_tiles_nor_gl_4k.jpg",
+      roughnessMap: "/textures/floor/stone_embedded_tiles_rough_4k.jpg",
+      repeat: [0.8, 0.6],
+    },
   },
 ];
 
